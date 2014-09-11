@@ -1,5 +1,6 @@
 {
     "require": {
-        "doctrine/doctrine2": "master"
+        "doctrine/orm": "2.5.*@dev",
+        "doctrine/dbal": "2.5.*@dev"
     }
 }
