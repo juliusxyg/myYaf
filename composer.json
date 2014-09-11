@@ -1,0 +1,5 @@
+{
+    "require": {
+        "doctrine/doctrine2": "master"
+    }
+}
