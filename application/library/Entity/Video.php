@@ -14,6 +14,8 @@ class Video
     private $id;
     /** @Column(length=140) */
     private $title;
+    /** @Column(length=140) */
+    private $url;
     /** @Column(type="datetime", name="created_at") */
     private $createdAt;
 
@@ -79,5 +81,29 @@ class Video
     public function getCreatedAt()
     {
         return $this->createdAt;
+    }
+
+    /**
+     * Set url
+     *
+     * @param string $url
+     *
+     * @return Video
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    /**
+     * Get url
+     *
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->url;
     }
 }
