@@ -3,6 +3,14 @@ myYaf
 
 learning yaf
 
+=====
+
+curl -sS https://getcomposer.org/installer | php
+
+mv composer.phar /usr/local/bin/composer
+
+======
+
 composer(.phar) install --prefer-dist
 
 deprecated: php vendor/bin/doctrine orm:convert-mapping --from-database php application/library/
