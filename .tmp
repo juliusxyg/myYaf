@@ -1,0 +1,446 @@
+<?php
+/*
+ *
+ */
+class IndexController extends Yaf\Controller_Abstract {
+
+	private $redisKey = "live_e7joy";
+	private $redisTmpKey = "tmp_live_e7joy";
+
+	private $redisDota2Key = "live_dota2_e7joy";
+	private $redisDota2TmpKey = "tmp_live_dota2_e7joy";
+
+	private $redis;
+
+	public function init(){
+		$config = Yaf\Registry::get("config");
+		$this->redis = new RedisCache($config->redis->toArray());
+	}
+
+	/*
+	 *
+	 */
+	public function indexAction() {
+		echo "hello live e7joy";
+		exit();
+	}
+
+	public function testAction() {
+		$url = "http://api.twitch.tv/kraken/streams?limit=1&offset=0&game=League+of+Legends&on_site=1";
+		$res = $this->mycurl($url);
+		$res = json_decode($res, true);
+		if ($res && is_array($res)) {
+			foreach ($res['streams'] as $key => $value) {
+				$data = array();
+			    $pImg = '';
+			    $pTitle = '';
+			    $pUrl = '';
+			    $pRes = null;
+			    $rUrl = '';
+			    $rRes = '';
+
+				$pImg = $value["preview"]["medium"];
+	    		$pTitle = $value["channel"]["display_name"];
+	    		$pUrl = "http://api.twitch.tv/api/channels/".$value["channel"]["name"]."/access_token";
+	    		$pRes = $this->mycurl($pUrl, "Twitch 20140818 (iPhone; iPhone OS 7.1.2; zh_CN)");
+	    		$pRes = json_decode($pRes, true);
+	    		if ($pRes && is_array($pRes) && $pRes["token"] && $pRes["sig"]) {
+					$rUrl = "http://usher.twitch.tv/api/channel/hls/".$value["channel"]["name"].".m3u8?token=".urlencode($pRes["token"])."&sig=".$pRes["sig"];
+					if ($this->checkM3U8($rUrl)) {
+						$rRes = $this->mycurl($rUrl, "Twitch 20140818 (iPhone; iPhone OS 7.1.2; zh_CN)");
+						preg_match_all('/VIDEO\=\"medium\"(.*)\#EXT-X-MEDIA\:TYPE=VIDEO\,GROUP-ID\=\"low\"/', str_replace("\n","",$rRes), $matches);
+						if ($matches && is_array($matches) && $matches[1][0]) {
+							if ($this->checkM3U8($matches[1][0])) {
+								$data['img'] = $pImg;
+								$data['title'] = $pTitle;
+								$data['source'] = 'twitch';
+								$data['vurl'] = urlencode($matches[1][0]);
+								//$this->redis->rpush($this->redisTmpKey, json_encode($data));
+							}
+						}
+					}
+	    		}
+			}
+		}
+		
+		exit;
+		/*$url = "http://v1.m.api.zhanqi.tv/m/room?gameId=6&page=1";
+
+$res = $this->mycurl($url);
+$res = json_decode($res, true);
+foreach ($res['data'] as $key => $value) {
+	$data = array();
+    $pImg = '';
+    $pTitle = '';
+    $pUrl = '';
+    $pRes = null;
+
+    $pImg = $value["spic"];
+    $pTitle = $value["title"];
+    $pUrl = "http://v1.m.api.zhanqi.tv/m/live?anchorId=".$value["anchorId"];
+    $pRes = $this->mycurl($pUrl);
+	$pRes = json_decode($pRes, true);
+	if ($pRes['code'] == 0) {
+		$data['img'] = $pImg;
+		$data['title'] = $pTitle;
+		$data['source'] = 'zhanqi';
+		$data['vurl'] = $pRes['data']['room_info']['flashvars']['RtmpUrl'].'/'.$pRes['data']['room_info']['flashvars']['LiveID'];
+		if ($this->checkM3U8($data['vurl'])) {
+			//$this->redis->rpush($this->redisTmpKey, json_encode($data));
+			var_dump($data);echo "<br>";
+		}
+		
+	}
+}
+
+$pImg = "http://img.plures.net/live/screenshots/15368/4.jpg";
+$pTitle = "英雄联盟三周年庆狂欢盛典重播";
+$pUrl = "http://star.tga.plu.cn/m/lpl";
+$pRes = $this->mycurl($pUrl);
+preg_match_all("/live_player\.html\?cnlid\=(\d+)/", $pRes, $cnlidArr);
+if($cnlidArr && is_array($cnlidArr) && is_array($cnlidArr[1]) && !empty($cnlidArr[1]) && $cnlidArr[1][0] != '') {
+        $data['img'] = $pImg;
+        $data['title'] = $pTitle;
+        $data['source'] = 'tga';
+        $data['vurl'] = "http://zb.v.qq.com:1863/?progid=".$cnlidArr[1][0]."&ostype=ios&rid=".md5(rand().'_'.time());
+        if ($this->checkM3U8($data['vurl'])) {
+                //$this->redis->rpush($this->redisTmpKey, json_encode($data));
+                var_dump($data);
+        }
+}
+exit;*/
+
+		for ($i=0; $i < $this->redis->lsize($this->redisKey); $i++) { 
+			$item = json_decode($this->redis->lget($this->redisKey,$i), true);
+			if ($item['source'] == 'douyutv') {
+				$res[] = $item;
+			}
+		}
+		$data['res'] = $res;
+
+		$vurl = '';
+		$params = $this->getRequest()->getParams();
+		var_dump($params);
+		if (isset($params['vurl'])) $vurl = urldecode($params['vurl']);
+		$data['vurl'] = (!$vurl)?$res[0]['vurl']:$vurl;
+
+		$this->getView()->data = $data;
+	}
+
+	/*
+	 *
+	 */
+	public function apiAction() {
+		header("Content-type:text/html; charset=utf-8");
+		$params = $this->getRequest()->getParams();
+		$game = $params["game"];
+		$start = $params["start"];
+		$num = $params["num"];
+		$res = array();
+		switch ($game) {
+			case 'lol':
+				for ($i=0; $i < $num; $i++) { 
+					if (($start + $i) > $this->redis->lsize($this->redisKey)) break;
+					if (!$this->redis->lget($this->redisKey,($i+$start))) break;
+					$res[] = json_decode($this->redis->lget($this->redisKey,($i+$start)), true);
+				}
+				break;
+			case 'dota2':
+				for ($i=0; $i < $num; $i++) { 
+					if (($start + $i) > $this->redis->lsize($this->redisDota2Key)) break;
+					if (!$this->redis->lget($this->redisDota2Key,($i+$start))) break;
+					$res[] = json_decode($this->redis->lget($this->redisDota2Key,($i+$start)), true);
+				}
+				break;
+			default:
+				echo "game error!";
+				break;
+		}
+		echo json_encode($res);
+		exit();
+	}
+
+	/*
+	 *
+	 */
+	public function dyUrlAction() {
+		$params = $this->getRequest()->getParams();
+		$room_id = $params["room_id"];
+
+		$url = 'http://api.douyutv.com/api/client/room/'.$room_id.'/?client_sys=ios';
+
+		$res = $this->mycurl($url, '%E6%96%97%E9%B1%BCTV/1.03 CFNetwork/672.1.15 Darwin/14.0.0');
+		$res = json_decode($res, true);
+		if ($res['error'] === 0 && is_array($res['data'])) {
+			header("User-Agent: %E6%96%97%E9%B1%BCTV/1.03 CFNetwork/672.1.15 Darwin/14.0.0");
+			header("Location: ".$res['data']['rtmp_url'].'/'.$res['data']['rtmp_live']);
+		}
+
+		exit();
+	}
+
+	public function spiderAction() {
+		$this->spiderLOL();
+		$this->spiderDota2();	
+		exit();
+	}
+
+	private function spiderLOL() {
+		$this->redis->delete($this->redisTmpKey);
+
+		/* LOL 3 years*/
+		$pImg = "http://img.plures.net/live/screenshots/15368/4.jpg";
+		$pTitle = "英雄联盟三周年狂欢盛典重播";
+		$pUrl = "http://star.tga.plu.cn/m/lpl";
+		$pRes = $this->mycurl($pUrl);
+		preg_match_all("/live_player\.html\?cnlid\=(\d+)/", $pRes, $cnlidArr);
+		if($cnlidArr && is_array($cnlidArr) && is_array($cnlidArr[1]) && !empty($cnlidArr[1]) && $cnlidArr[1][0] != '') {
+		        $data['img'] = $pImg;
+        		$data['title'] = $pTitle;
+        		$data['source'] = 'tga';
+        		$data['vurl'] = "http://zb.v.qq.com:1863/?progid=".$cnlidArr[1][0]."&ostype=ios&rid=".md5(rand().'_'.time());
+        		if ($this->checkM3U8($data['vurl'])) {
+                		$this->redis->rpush($this->redisTmpKey, json_encode($data));
+        		}
+		}
+
+		/* douyu */
+		$url = "http://api.douyutv.com/api/client/live/1?offset=0&limit=100&client_sys=ios";
+
+		$res = $this->mycurl($url, '%E6%96%97%E9%B1%BCTV/1.03 CFNetwork/672.1.15 Darwin/14.0.0');
+		$res = json_decode($res, true);
+		if ($res['error'] === 0 && is_array($res['data'])) {
+			foreach ($res['data'] as $key => $value) {
+				$data = array();
+
+				$data['img'] = $value["room_src"];
+				$data['title'] = $value["room_name"];
+				$data['source'] = 'douyutv';
+				$data['vurl'] = 'http://live.e7joy.com/dyUrl/'.$value["room_id"];
+				$this->redis->rpush($this->redisTmpKey, json_encode($data));
+			}
+		}
+
+		/* zhanqi tv */
+		$url = "http://v1.m.api.zhanqi.tv/m/room?gameId=6&page=1";
+
+		$res = $this->mycurl($url);
+		$res = json_decode($res, true);
+		foreach ($res['data'] as $key => $value) {
+        		$data = array();
+    			$pImg = '';
+    			$pTitle = '';
+    			$pUrl = '';
+    			$pRes = null;
+
+    			$pImg = $value["spic"];
+    			$pTitle = $value["title"];
+    			$pUrl = "http://v1.m.api.zhanqi.tv/m/live?anchorId=".$value["anchorId"];
+    			$pRes = $this->mycurl($pUrl);
+        		$pRes = json_decode($pRes, true);
+        		if ($pRes['code'] == 0) {
+                		$data['img'] = $pImg;
+                		$data['title'] = $pTitle;
+                		$data['source'] = 'zhanqi';
+                		$data['vurl'] = $pRes['data']['room_info']['flashvars']['RtmpUrl'].'/'.$pRes['data']['room_info']['flashvars']['LiveID'];
+                		if ($this->checkM3U8($data['vurl'])) {
+                        		$this->redis->rpush($this->redisTmpKey, json_encode($data));
+                		}
+
+        		}
+		}
+
+		/* tga plu */
+		$url = "http://api.plu.cn/tga/streams?max-results=150&game=4";
+
+		$res = $this->mycurl($url);
+		$res = json_decode($res, true);
+		foreach ($res['data']['items'] as $key => $value) {
+			$data = array();
+			$pImg = '';
+			$pTitle = '';
+			$pUrl = '';
+			$pRes = null;
+
+			$pImg = $value["preview"];
+			$pTitle = $value["channel"]["name"];
+			$pUrl = $value["channel"]["url"];
+			$pRes = $this->mycurl($pUrl);
+			preg_match_all("/\"BoardCast_Address\":\"(\d+)\"/", $pRes, $cnlidArr);
+			if($cnlidArr && is_array($cnlidArr) && is_array($cnlidArr[1]) && !empty($cnlidArr[1]) && $cnlidArr[1][0] != '') {
+				$data['img'] = $pImg;
+				$data['title'] = $pTitle;
+				$data['source'] = 'tga';
+				$data['vurl'] = "http://zb.v.qq.com:1863/?progid=".$cnlidArr[1][0]."&ostype=ios&rid=".md5(rand().'_'.time());
+				if ($this->checkM3U8($data['vurl'])) {
+					$this->redis->rpush($this->redisTmpKey, json_encode($data));
+				}
+			}
+		}
+
+		/* Twitch TV */
+		$url = "http://api.twitch.tv/kraken/streams?limit=10&offset=0&game=League+of+Legends&on_site=1";
+		$res = $this->mycurl($url);
+		$res = json_decode($res, true);
+		if ($res && is_array($res)) {
+			foreach ($res['streams'] as $key => $value) {
+				$data = array();
+			    $pImg = '';
+			    $pTitle = '';
+			    $pUrl = '';
+			    $pRes = null;
+			    $rUrl = '';
+			    $rRes = '';
+
+				$pImg = $value["preview"]["medium"];
+	    		$pTitle = $value["channel"]["display_name"];
+	    		$pUrl = "http://api.twitch.tv/api/channels/".$value["channel"]["name"]."/access_token";
+	    		$pRes = $this->mycurl($pUrl, "Twitch 20140818 (iPhone; iPhone OS 7.1.2; zh_CN)");
+	    		$pRes = json_decode($pRes, true);
+	    		if ($pRes && is_array($pRes) && $pRes["token"] && $pRes["sig"]) {
+					$rUrl = "http://usher.twitch.tv/api/channel/hls/".$value["channel"]["name"].".m3u8?token=".urlencode($pRes["token"])."&sig=".$pRes["sig"];
+					if ($this->checkM3U8($rUrl)) {
+						$rRes = $this->mycurl($rUrl, "Twitch 20140818 (iPhone; iPhone OS 7.1.2; zh_CN)");
+						preg_match_all('/VIDEO\=\"medium\"(.*)\#EXT-X-MEDIA\:TYPE=VIDEO\,GROUP-ID\=\"low\"/', str_replace("\n","",$rRes), $matches);
+						if ($matches && is_array($matches) && $matches[1][0]) {
+							if ($this->checkM3U8($matches[1][0])) {
+								$data['img'] = $pImg;
+								$data['title'] = "TwitchTV-".$pTitle."-加载有点慢,耐心";
+								$data['source'] = 'twitch';
+								$data['vurl'] = urlencode($matches[1][0]);
+								$this->redis->rpush($this->redisTmpKey, json_encode($data));
+							}
+						}
+					}
+	    		}
+			}
+		}
+
+		if ($this->redis->lsize($this->redisTmpKey) > 0) $this->redis->rename($this->redisTmpKey, $this->redisKey);
+	}
+
+	private function spiderDota2() {
+		$this->redis->delete($this->redisDota2TmpKey);
+
+		/* zhanqi tv */
+		$url = "http://v1.m.api.zhanqi.tv/m/room?gameId=10&page=1";
+
+		$res = $this->mycurl($url);
+		$res = json_decode($res, true);
+		foreach ($res['data'] as $key => $value) {
+        		$data = array();
+    			$pImg = '';
+    			$pTitle = '';
+    			$pUrl = '';
+    			$pRes = null;
+
+    			$pImg = $value["spic"];
+    			$pTitle = $value["title"];
+    			$pUrl = "http://v1.m.api.zhanqi.tv/m/live?anchorId=".$value["anchorId"];
+    			$pRes = $this->mycurl($pUrl);
+        		$pRes = json_decode($pRes, true);
+        		if ($pRes['code'] == 0) {
+                		$data['img'] = $pImg;
+                		$data['title'] = $pTitle;
+                		$data['source'] = 'zhanqi';
+                		$data['vurl'] = $pRes['data']['room_info']['flashvars']['RtmpUrl'].'/'.$pRes['data']['room_info']['flashvars']['LiveID'];
+                		if ($this->checkM3U8($data['vurl'])) {
+                        		$this->redis->rpush($this->redisDota2TmpKey, json_encode($data));
+                		}
+
+        		}
+		}
+
+		/* douyu */
+		$url = "http://api.douyutv.com/api/client/live/3?offset=0&limit=100&client_sys=ios";
+
+		$res = $this->mycurl($url, '%E6%96%97%E9%B1%BCTV/1.03 CFNetwork/672.1.15 Darwin/14.0.0');
+		$res = json_decode($res, true);
+		if ($res['error'] === 0 && is_array($res['data'])) {
+			foreach ($res['data'] as $key => $value) {
+				$data = array();
+
+				$data['img'] = $value["room_src"];
+				$data['title'] = $value["room_name"];
+				$data['source'] = 'douyutv';
+				$data['vurl'] = 'http://live.e7joy.com/dyUrl/'.$value["room_id"];
+				$this->redis->rpush($this->redisDota2TmpKey, json_encode($data));
+			}
+		}
+
+		if ($this->redis->lsize($this->redisDota2TmpKey) > 0) $this->redis->rename($this->redisDota2TmpKey, $this->redisDota2Key);
+	}
+
+	private function mycurl($url, $ua='AppleCoreMedia/1.0.0.11D257 (iPhone; U; CPU OS 7_1_2 like Mac OS X; zh_cn)', $parm='', $timeout=10) {
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_USERAGENT, $ua);
+		curl_setopt($curl, CURLOPT_TIMEOUT, $timeout);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($curl, CURLOPT_HEADER, 0);
+		if(!empty($parm))
+		{
+		    curl_setopt($curl, CURLOPT_POST, 1 );
+		    curl_setopt($curl, CURLOPT_POSTFIELDS, (is_array($parm) ? http_build_query($parm) : $parm));
+		}
+		$res = curl_exec($curl);
+		curl_close($curl);
+
+		return $res;
+	}
+
+	private function checkM3U8($addr) {
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $addr);
+		curl_setopt($curl, CURLOPT_USERAGENT, 'AppleCoreMedia/1.0.0.11D257 (iPhone; U; CPU OS 7_1_2 like Mac OS X; zh_cn)');
+		curl_setopt($curl, CURLOPT_TIMEOUT, 5);
+		$res = $this->mycurl_redirect_exec($curl);
+		curl_close($curl);
+		return ($res)?true:false;
+	}
+
+	/*
+	 *	curl 跳转抓取
+	 */
+	private function mycurl_redirect_exec($curl, &$redirects=0, $curlopt_returntransfer = true, $curlopt_maxredirs = 10, $curlopt_header = false) {
+		curl_setopt($curl, CURLOPT_HEADER, true);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		$data = curl_exec($curl);
+		$http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+		$exceeded_max_redirects = $curlopt_maxredirs > $redirects;
+		$exist_more_redirects = false;
+		if ($http_code == 301 || $http_code == 302) {
+			if ($exceeded_max_redirects) {
+				list($header) = explode("\r\n\r\n", $data, 2);
+				$matches = array();
+
+				preg_match('/Location: (.*)/', $header, $matches);
+				$url = trim(array_pop($matches));
+				$url_parsed = parse_url($url);
+				if (isset($url_parsed)) {
+					curl_setopt($curl, CURLOPT_URL, $url);
+					$redirects++;
+					return $this->mycurl_redirect_exec($curl, $redirects, $curlopt_returntransfer, $curlopt_maxredirs, $curlopt_header);
+				}
+			} else {
+				$exist_more_redirects = true;
+			}
+		}
+		if ($data !== false) {
+			if (!$curlopt_header) list(,$data) = explode("\r\n\r\n", $data, 2);
+			if ($exist_more_redirects) return false;
+			if ($curlopt_returntransfer) {
+				return $data;
+			} else {
+				if (curl_errno($ch) === 0) 
+					return true;
+				else
+					return false;
+			}
+		} else {
+			return false;
+		}
+	}
+}
+?>
