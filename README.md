@@ -3,15 +3,17 @@ myYaf
 
 learning yaf
 
-=====
+==install composer===
 
 curl -sS https://getcomposer.org/installer | php
 
 mv composer.phar /usr/local/bin/composer
 
-======
+==run composer====
 
 composer(.phar) install --prefer-dist
+
+==integrate doctrime===
 
 deprecated: php vendor/bin/doctrine orm:convert-mapping --from-database php application/library/
 
@@ -20,3 +22,7 @@ deprecated: php vendor/bin/doctrine orm:convert-mapping --from-database php appl
 php vendor/bin/doctrine orm:generate-entities --no-backup application/library/
 
 php vendor/bin/doctrine orm:schema-tool:create --dump-sql
+
+==use command line======
+
+php application/yaf yaf:helloworld xiaoming [--upper]
