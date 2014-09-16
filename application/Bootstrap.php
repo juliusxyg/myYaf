@@ -2,22 +2,22 @@
 
 /**
  * 所有在Bootstrap类中, 以_init开头的方法, 都会被Yaf调用,
- * 这些方法, 都接受一个参数:Yaf_Dispatcher $dispatcher
+ * 这些方法, 都接受一个参数:Yaf\Dispatcher $dispatcher
  * 调用的次序, 和申明的次序相同
  */
 
-class Bootstrap extends Yaf_Bootstrap_Abstract
+class Bootstrap extends Yaf\Bootstrap_Abstract
 {
 
   public function _initConfig()
   {
-    $config = Yaf_Application::app()->getConfig();
-    Yaf_Registry::set("config", $config);
+    $config = Yaf\Application::app()->getConfig();
+    Yaf\Registry::set("config", $config);
   }
 
-  public function _initDoctrine(Yaf_Dispatcher $dispatcher)
+  public function _initDoctrine(Yaf\Dispatcher $dispatcher)
   {
-  	$config = Yaf_Registry::get("config");
+  	$config = Yaf\Registry::get("config");
 
   	//yaf的默认机制只用自己的autoload，会出现redeclare的问题， 所以放到library下了，唉
   	$doctrineLoader = new Doctrine\Common\ClassLoader('Entity', $config->get('application')->library);
@@ -58,6 +58,6 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
 		);
 
 		$em = Doctrine\ORM\EntityManager::create($connectionParams, $doctrineConfig);
-		Yaf_Registry::set("entityManager", $em);
+		Yaf\Registry::set("entityManager", $em);
   }
 }
