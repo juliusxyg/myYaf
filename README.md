@@ -23,6 +23,8 @@ php vendor/bin/doctrine orm:generate-entities --no-backup application/library/
 
 php vendor/bin/doctrine orm:schema-tool:create --dump-sql
 
+php vendor/bin/doctrine orm:schema-tool:update --dump-sql
+
 ==use command line======
 
 php application/yaf yaf:helloworld xiaoming [--upper]
