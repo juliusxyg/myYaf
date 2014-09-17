@@ -2,10 +2,17 @@
 
 class IndexController extends Yaf\Controller_Abstract 
 {
-   public function indexAction() 
+  public function indexAction() 
    {//默认Action
    		
     $this->getView()->assign("content", "I am backend");
+
+  }
+
+  public function loginAction() 
+   {//默认Action
+   		
+    $this->getView()->assign("content", "I am backend login");
 
   }
 }

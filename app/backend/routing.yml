@@ -1,0 +1,3 @@
+login:
+  url:   /login
+  param: { controller: index, action: login }
