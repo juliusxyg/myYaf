@@ -3,5 +3,5 @@ define("APP_PATH",  realpath(dirname(__FILE__) . '/../')); /* 指向public的上
 
 require_once APP_PATH . "/vendor/autoload.php";
 
-$app  = new Yaf\Application(APP_PATH . "/conf/frontend.ini");
+$app  = new Yaf\Application(APP_PATH . "/conf/backend.ini");
 $app->bootstrap()->run();

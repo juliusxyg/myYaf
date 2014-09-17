@@ -27,4 +27,4 @@ php vendor/bin/doctrine orm:schema-tool:update --dump-sql
 
 ==use command line======
 
-php application/yaf yaf:helloworld xiaoming [--upper]
+php app/yaf yaf:helloworld xiaoming [--upper]
