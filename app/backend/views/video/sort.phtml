@@ -1,0 +1,29 @@
+<table class="table table-striped">
+<?php if(!empty($results)): ?>
+	<tr>
+  	<th>Weight</td>
+	  <th>Title</td>
+	  <th>Game</td>
+	  <th>Source</td>
+	  <th>Vurl</td>
+	</tr>
+	<?php foreach($results as $video): ?>
+  <tr>
+  	<td><input type="text" id="v_<?php echo $video['id'];?>" name="<?php echo $video['id'];?>" value="<?php echo $video['weight']+0;?>" style="width:40px;"/><a href="###" onclick="save(<?php echo $video['id'];?>);">save</a></td>
+	  <td><?php echo $video['title'];?></td>
+	  <td><?php echo $video['game'];?></td>
+	  <td><?php echo $video['source'];?></td>
+	  <td><?php echo $video['vurl'];?></td>
+	</tr>
+	<?php endforeach;?>
+<?php endif;?>
+</table>
+
+<script>
+function save(vid)
+{
+	var weight = $("#v_"+vid).val();
+	$.post("weight",{vid:vid, weight:weight}, function(data){
+	}, 'json');
+}
+</script>

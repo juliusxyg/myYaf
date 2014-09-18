@@ -27,6 +27,8 @@ class LayoutPlugin extends Yaf\Plugin_Abstract
 
   public function postDispatch ( Yaf\Request_Abstract $request , Yaf\Response_Abstract $response )
   {
+    if($this->_layoutFile)
+    {
       $body = $response->getBody();
 
       $response->clearBody();
@@ -37,6 +39,7 @@ class LayoutPlugin extends Yaf\Plugin_Abstract
       $layout->assign('layout', $this->_layoutVars);
 
       $response->setBody($layout->render($this->_layoutFile));
+    }
   }
 
   public function setTemplate( $layoutFile )

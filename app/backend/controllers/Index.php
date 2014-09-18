@@ -11,6 +11,8 @@ class IndexController extends Yaf\Controller_Abstract
 
   public function loginAction() 
   {//默认Action
+    Yaf\Session::getInstance()->set("Authentication", false);
+    
    	if($this->getRequest()->isPost())
     {
       $username = $this->getRequest()->getPost("username","");
@@ -19,8 +21,6 @@ class IndexController extends Yaf\Controller_Abstract
          $password == Yaf\Registry::get("config")->get("admin")->passwd)
       {
         Yaf\Session::getInstance()->set("Authentication", true);
-      }else{
-        Yaf\Session::getInstance()->set("Authentication", false);
       }
     }
 
