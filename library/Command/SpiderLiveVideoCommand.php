@@ -148,6 +148,7 @@ class SpiderLiveVideoCommand extends Command
         $livevideo->setSource($data['source']);
         $livevideo->setVurl($data['vurl']);
         $livevideo->setGame($this->name);
+        $livevideo->setHash(md5($data['title'].$data['source']));
         $em->persist($livevideo);
         $em->flush();
     }
@@ -158,7 +159,7 @@ class SpiderLiveVideoCommand extends Command
 
         $em = \Yaf\Registry::get("entityManager");
         //insert new
-        $em->getConnection()->exec("REPLACE INTO live_video_run SELECT * FROM live_video WHERE game='{$this->name}' AND created_at>'{$this->beginToCrawl}';");
+        $em->getConnection()->exec("REPLACE INTO live_video_run SELECT a.id, a.title, a.img, a.source, a.vurl, a.game, a.created_at, b.weight FROM live_video as a LEFT JOIN live_video_sort as b ON a.hash = b.hash WHERE game='{$this->name}' AND created_at>'{$this->beginToCrawl}';");
         //delete old
         $em->getConnection()->exec("DELETE FROM live_video_run WHERE game='{$this->name}' AND created_at<='{$this->beginToCrawl}';");
         //clean lazy table

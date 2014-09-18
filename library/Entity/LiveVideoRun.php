@@ -6,7 +6,7 @@ namespace Entity;
  */
 class LiveVideoRun
 {
-		/**
+	/**
      * @Id @Column(type="integer")
      */
     private $id;
@@ -22,6 +22,8 @@ class LiveVideoRun
     private $game;
     /** @Column(type="datetime", name="created_at") */
     private $createdAt;
+    /** @Column(type="integer") */
+    private $weight;
 
     /**
      * Set id
@@ -189,5 +191,29 @@ class LiveVideoRun
     public function getCreatedAt()
     {
         return $this->createdAt;
+    }
+
+    /**
+     * Set weight
+     *
+     * @param integer $weight
+     *
+     * @return LiveVideoRun
+     */
+    public function setWeight($weight)
+    {
+        $this->weight = $weight;
+
+        return $this;
+    }
+
+    /**
+     * Get weight
+     *
+     * @return integer
+     */
+    public function getWeight()
+    {
+        return $this->weight;
     }
 }

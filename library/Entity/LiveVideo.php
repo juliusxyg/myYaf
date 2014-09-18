@@ -24,6 +24,8 @@ class LiveVideo
     private $game;
     /** @Column(type="datetime", name="created_at") */
     private $createdAt;
+    /** @Column(length=32) */
+    private $hash;
 
     /** @PrePersist */
     public function doOnPrePersist()
@@ -183,5 +185,29 @@ class LiveVideo
     public function getGame()
     {
         return $this->game;
+    }
+
+    /**
+     * Set hash
+     *
+     * @param string $hash
+     *
+     * @return LiveVideo
+     */
+    public function setHash($hash)
+    {
+        $this->hash = $hash;
+
+        return $this;
+    }
+
+    /**
+     * Get hash
+     *
+     * @return string
+     */
+    public function getHash()
+    {
+        return $this->hash;
     }
 }
