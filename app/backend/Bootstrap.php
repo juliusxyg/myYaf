@@ -74,4 +74,11 @@ class Bootstrap extends Yaf\Bootstrap_Abstract
     	}
   	}
   }
+
+  public function _initLayout(Yaf\Dispatcher $dispatcher)
+  {
+    $layout = new LayoutPlugin();
+    $dispatcher->registerPlugin($layout);
+    Yaf\Registry::set("layout", $layout);
+  }
 }

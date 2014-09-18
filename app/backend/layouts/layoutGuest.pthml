@@ -1,0 +1,8 @@
+<html>
+ <head>
+   <title>back office welcome you - layout</title>
+ </head>
+ <body>
+   <?php echo $content;?>
+ </body>
+</html>
