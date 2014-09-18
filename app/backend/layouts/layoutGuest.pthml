@@ -1,8 +1,11 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
  <head>
-   <title>back office welcome you - layout</title>
+    <title>back office welcome you</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
  </head>
  <body>
-   <?php echo $content;?>
+    <?php echo $content;?>
  </body>
 </html>
