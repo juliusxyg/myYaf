@@ -32,8 +32,7 @@ class VideoController extends Yaf\Controller_Abstract
       {
         if($video->getSort())
         {
-          foreach($video->getSort() as $sort)
-            $sort->setWeight($weight);
+          $video->getSort()->setWeight($weight);
         }else{
           $videoSort = new Entity\LiveVideoSort();
           $videoSort->setHash($video->getHash());

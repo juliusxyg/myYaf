@@ -26,10 +26,7 @@ class LiveVideo
     private $createdAt;
     /** @Column(length=32) */
     private $hash;
-    /**
-     * @ManyToMany(targetEntity="LiveVideoSort")
-     * @JoinColumn(name="hash", referencedColumnName="hash")
-     **/
+
     private $sort;
 
     /** @PrePersist */
@@ -216,51 +213,13 @@ class LiveVideo
         return $this->hash;
     }
 
-    
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->sort = new \Doctrine\Common\Collections\ArrayCollection();
-    }
-
-    /**
-     * Add sort
-     *
-     * @param \Entity\LiveVideoSort $sort
-     *
-     * @return LiveVideo
-     */
-    public function addSort(\Entity\LiveVideoSort $sort)
-    {
-        $this->sort[] = $sort;
-
-        return $this;
-    }
-
-    /**
-     * Remove sort
-     *
-     * @param \Entity\LiveVideoSort $sort
-     */
-    public function removeSort(\Entity\LiveVideoSort $sort)
-    {
-        $this->sort->removeElement($sort);
-    }
-
-    /**
-     * Get sort
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
     public function getSort()
     {   
         if(!$this->sort)
         {
             $tmpSort = \Yaf\Registry::get("entityManager")->find("\Entity\LiveVideoSort", $this->hash);
             if($tmpSort)
-                $this->addSort($tmpSort);
+                $this->sort = $tmpSort;
         }
         return $this->sort;
     }

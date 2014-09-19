@@ -7,9 +7,30 @@ class IndexController extends Yaf\Controller_Abstract
    		
     $this->getView()->assign("content", "Hello World");
 
-    $em = Yaf\Registry::get("entityManager");
-  	$video = new Entity\Video;
-		var_dump($video);
+    
+  }
+
+  public function apiAction() 
+  {
+  	if(1 || $this->getRequest()->isPost())
+    {
+    	$game = $this->getRequest()->getPost("game","dota2");
+    	$start = $this->getRequest()->getPost("start","0");
+    	$num = $this->getRequest()->getPost("num","10");
+
+    	if(!$game || !is_numeric($start) || !is_numeric($num))
+    	{
+    		$this->getResponse()->setBody(json_encode(array("error"=>0, "result"=>array())));
+    	}else{
+
+	    	$em = Yaf\Registry::get("entityManager");
+		    $query = $em->createQuery('SELECT a.title, a.game, a.source, a.vurl FROM Entity\LiveVideoRun a WHERE a.game = \''.$game.'\' ORDER BY a.weight DESC')->setMaxResults($num)->setFirstResult($start);
+		    $res = $query->getResult();
+	    	$this->getResponse()->setBody(json_encode(array("error"=>0, "result"=>$res)));
+	    }
+    }
+
+    Yaf\DisPatcher::getInstance()->disableView();
   }
 }
 ?>
