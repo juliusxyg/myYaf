@@ -7,7 +7,7 @@ class VideoController extends Yaf\Controller_Abstract
   {//默认Action
     if(!Yaf\Session::getInstance()->get("Authentication"))
     {
-     // $this->redirect("/login");
+      $this->redirect("/admin.php/login");
     }
     
    	$em = Yaf\Registry::get("entityManager");

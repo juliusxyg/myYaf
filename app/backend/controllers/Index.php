@@ -21,6 +21,7 @@ class IndexController extends Yaf\Controller_Abstract
          $password == Yaf\Registry::get("config")->get("admin")->passwd)
       {
         Yaf\Session::getInstance()->set("Authentication", true);
+        $this->redirect("/admin.php/video/sort");
       }
     }
 
