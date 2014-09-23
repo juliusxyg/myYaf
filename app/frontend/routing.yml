@@ -1,0 +1,7 @@
+dy_vurl:
+  url:   /v1/:room_id
+  param: { controller: index, action: dyUrl }
+
+api:
+  url:   /api
+  param: { controller: index, action: api }

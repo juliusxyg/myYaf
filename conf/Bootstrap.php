@@ -60,4 +60,18 @@ class Bootstrap extends Yaf\Bootstrap_Abstract
 		$em = Doctrine\ORM\EntityManager::create($connectionParams, $doctrineConfig);
 		Yaf\Registry::set("entityManager", $em);
   }
+
+  public function _initRouter(Yaf\Dispatcher $dispatcher)
+  {
+  	$config = Yaf\Registry::get("config");
+  	$routes = Symfony\Component\Yaml\Yaml::parse($config->get('application')->directory . "/routing.yml");
+  	if(is_array($routes))
+  	{
+  		$router = $dispatcher->getRouter();
+  		foreach($routes as $name=>$route)
+  		{
+    		$router->addRoute($name, new Yaf\Route\Rewrite($route['url'], $route['param']));
+    	}
+  	}
+  }
 }
