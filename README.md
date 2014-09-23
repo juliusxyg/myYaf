@@ -28,3 +28,9 @@ php vendor/bin/doctrine orm:schema-tool:update --dump-sql
 ==use command line======
 
 php app/yaf yaf:helloworld xiaoming [--upper]
+
+==helper=====
+
+Yaf\Registry::get("logger")->addInfo('something');
+
+Yaf\Registry::get("entityManager");
