@@ -15,6 +15,16 @@ class Bootstrap extends Yaf\Bootstrap_Abstract
     Yaf\Registry::set("config", $config);
   }
 
+  public function _initMonolog()
+  {
+    $logger = new Monolog\Logger("logger");
+    $logger->pushHandler(new Monolog\Handler\StreamHandler(APP_PATH.'/log/'.(Yaf\Registry::get("config")->get('application')->name).'.log', Monolog\Logger::DEBUG));
+
+    Yaf\Registry::set("logger", $logger);
+
+    $logger->addInfo("bootstrap logger is ready");
+  }
+
   public function _initDoctrine(Yaf\Dispatcher $dispatcher)
   {
   	$config = Yaf\Registry::get("config");
@@ -59,6 +69,8 @@ class Bootstrap extends Yaf\Bootstrap_Abstract
 
 		$em = Doctrine\ORM\EntityManager::create($connectionParams, $doctrineConfig);
 		Yaf\Registry::set("entityManager", $em);
+
+    Yaf\Registry::get("logger")->addInfo("bootstrap init doctrine");
   }
 
   public function _initRouter(Yaf\Dispatcher $dispatcher)
@@ -73,5 +85,7 @@ class Bootstrap extends Yaf\Bootstrap_Abstract
     		$router->addRoute($name, new Yaf\Route\Rewrite($route['url'], $route['param']));
     	}
   	}
+
+    Yaf\Registry::get("logger")->addInfo("bootstrap init router");
   }
 }
