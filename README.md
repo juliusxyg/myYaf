@@ -34,3 +34,7 @@ php app/yaf yaf:helloworld xiaoming [--upper]
 Yaf\Registry::get("logger")->addInfo('something');
 
 Yaf\Registry::get("entityManager");
+
+==phpunit======
+
+php vendor/bin/phpunit --bootstrap=test/bootstrap/frontend.php test/unit/SimpleTest

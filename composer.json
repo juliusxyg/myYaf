@@ -3,6 +3,7 @@
         "doctrine/orm": "2.5.*@dev",
         "doctrine/dbal": "2.5.*@dev",
         "symfony/yaml": "2.6.*@dev",
-        "monolog/monolog": "1.11.*@dev"
+        "monolog/monolog": "1.11.*@dev",
+        "phpunit/phpunit": "4.3.*"
     }
 }
