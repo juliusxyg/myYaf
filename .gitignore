@@ -1,4 +1,5 @@
 /vendor/*
 /log/*
+/cache/*
 composer.lock
 *.php~
