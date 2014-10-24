@@ -1,0 +1,6 @@
+Aspect:
+  validate_name: { class: '\Video\ValidateNameAspect' }
+  do_search: { class: '\Video\DoSearchAspect' }
+
+Chain:
+  search_video: [ validate_name , do_search ]
