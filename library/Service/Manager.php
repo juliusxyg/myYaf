@@ -8,11 +8,19 @@ namespace Service;
 * $searchResult = $videoService->getResult();
 */
 
+/**
+*	Entry of a Service
+*/
 class Manager
 {
+	/* chain objec */
 	private $chain;
+	/* the generated service class name */
 	public $containerName;
 
+	/**
+	 *	$configPath|string			service yaml file, e.g. sample.yml
+	 */
 	public function __construct($configPath)
 	{
 		if(!$this->isConfigParsed($configPath))
@@ -22,23 +30,46 @@ class Manager
 		}
 	}
 
+	/**
+	 *	$chanName|string			chain name in service yaml file
+	 *  $inputs|array 				input parameters of this chain
+	 *
+	 *  RETURN object|Result
+	 */
 	public function invokeChain($chainName, Array $inputs = array())
 	{
 		$this->chain = new Chain($this->containerName, 'get_'.$chainName, $inputs);
 		$this->chain->walk();
+	}
+
+	/**
+	 *  A proxy method
+	 *	retrieve current invoked chain context,
+	 *  this context mostly is used to get inputs of current chain
+	 *
+	 *  RETURN object|Context
+	 */
+	public function getContext()
+	{
+		return $this->chain->getContext();
+	}
+
+	/**
+	 *  A proxy method
+	 *	retrieve invoked chain's result
+	 *
+	 *  RETURN object|Context
+	 */
+	public function getResult()
+	{
 		return $this->chain->getResult();
 	}
 
-	public function getContext()
-	{
-		return $this->chain->context;
-	}
-
-	public function getResult()
-	{
-		return $this->chain->result;
-	}
-
+	/**
+	 *  to check whether the service yaml file is parsed
+	 *
+	 *  RETURN bool
+	 */
 	protected function isConfigParsed($filePath)
 	{
 		$this->containerName = "service_".md5($filePath);
@@ -50,6 +81,10 @@ class Manager
 		return false;
 	}
 
+	/**
+	 *  according to the service yaml file, to generate a mapped service class in cache dir
+	 *  and include it into runtime environment
+	 */
 	protected function generateFile($config)
 	{
 		if(!is_array($config) || !isset($config['Chain']) || !isset($config['Aspect']))
@@ -59,23 +94,29 @@ class Manager
 
 		$content = "
 		<?php 
+		//{$this->containerName}
 		class {$this->containerName}
 		{		
 			";
 
 		foreach($config['Aspect'] as $aspect_name=>$aspect_class)
 		{
-			$func = "public function get_{$aspect_name}()
+			$func = "
+			//{$aspect_name}
+			public function get_{$aspect_name}()
 			{
 				return new {$aspect_class['class']}();
 			}
+
 			";
 			$content .= $func;
 		}
 
 		foreach($config['Chain'] as $chain_name=>$chain_aspects)
 		{
-			$func = "public function get_{$chain_name}()
+			$func = "
+			//{$chain_name}
+			public function get_{$chain_name}()
 			{
 				return array(
 					";
@@ -86,11 +127,13 @@ class Manager
 			}
 				$func .= ");
 			}
+
 			";
 			$content .= $func;
 		}
 
-		$content .= "}";
+		$content .= "
+		}";
 
 		file_put_contents(APP_PATH.'cache/'.$this->containerName.".php", $content);
 

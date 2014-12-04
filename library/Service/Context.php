@@ -1,6 +1,9 @@
 <?php
 namespace Service;
 
+/**
+* array
+*/
 class Context extends ParamHolder
 {
 	public function __construct($inputs = '')

@@ -1,6 +1,7 @@
+#service aspects
 Aspect:
   validate_name: { class: '\Video\ValidateNameAspect' }
   do_search: { class: '\Video\DoSearchAspect' }
-
+#service chains, each chain contains several aspects
 Chain:
   search_video: [ validate_name , do_search ]
