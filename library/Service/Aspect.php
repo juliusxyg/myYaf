@@ -1,9 +1,9 @@
 <?php
 namespace Service;
 
-class Aspect
+abstract class Aspect
 {
-	abstract public function process(Context $context, Result $result){}
+	abstract public function process(Context $context, Result $result);
 
 	public function run(Chain $chain)
 	{

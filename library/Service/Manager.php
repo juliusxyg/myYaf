@@ -26,6 +26,7 @@ class Manager
 	{
 		$this->chain = new Chain($this->containerName, 'get_'.$chainName, $inputs);
 		$this->chain->walk();
+		return $this->chain->getResult();
 	}
 
 	public function getContext()

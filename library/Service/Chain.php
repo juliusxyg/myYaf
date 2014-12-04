@@ -18,17 +18,17 @@ class Chain
 
 	public function walk()
 	{
-		if($this->index < count($this->_aspects))
+		$ir = $this->index++;
+		if($ir < count($this->_aspects))
 		{
-			$this->_aspects[$this->index]->run($this);
-			$this->index++;
+			$this->_aspects[$ir]->run($this);
 		}
 	}
 
 	protected function loadAspects($container, $name)
 	{
 		$object = new $container;
-		$this->_aspects = call_user_func_array(array($object, $name));
+		$this->_aspects = call_user_func_array(array($object, $name), array());
 	}
 
 	public function getContext()
