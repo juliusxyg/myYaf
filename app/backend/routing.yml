@@ -1,3 +1,7 @@
 login:
   url:   /login
   param: { controller: index, action: login }
+
+info:
+  url:   /info
+  param: { controller: index, action: info }

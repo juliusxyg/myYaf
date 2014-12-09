@@ -47,15 +47,36 @@ class Bootstrap extends Yaf\Bootstrap_Abstract
 	    $doctrineConfig->setAutoGenerateProxyClasses(false);
 		}
 
-		$connectionParams = array(
-	    'dbname' => $config->get('database')->connection->dbname,
-	    'user' => $config->get('database')->connection->user,
-	    'password' => $config->get('database')->connection->password,
-	    'host' => $config->get('database')->connection->host,
-	    'port' => $config->get('database')->connection->port,
-	    'charset' => $config->get('database')->connection->charset,
-	    'driver' => $config->get('database')->connection->driver,
-		);
+    $connectionParams = array(
+                          'driver' => $config->get('database')->connection->driver,
+                          'wrapperClass' => 'Doctrine\DBAL\Connections\MasterSlaveConnection',
+                          'master' => array(
+                                        'host' => $config->get('database')->connection->host,
+                                        'port' => $config->get('database')->connection->port,
+                                        'user' => $config->get('database')->connection->user,
+                                        'password' => $config->get('database')->connection->password,
+                                        'dbname' => $config->get('database')->connection->dbname,
+                                        'charset' => $config->get('database')->connection->charset,
+                                      ),
+                          'slaves' => array(
+                                        array(
+                                          'host' => $config->get('database')->connection->host,
+                                          'port' => $config->get('database')->connection->port,
+                                          'user' => $config->get('database')->connection->user,
+                                          'password' => $config->get('database')->connection->password,
+                                          'dbname' => $config->get('database')->connection->dbname,
+                                          'charset' => $config->get('database')->connection->charset,
+                                        ),
+                                        array(
+                                          'host' => $config->get('database')->connection->host,
+                                          'port' => $config->get('database')->connection->port,
+                                          'user' => $config->get('database')->connection->user,
+                                          'password' => $config->get('database')->connection->password,
+                                          'dbname' => $config->get('database')->connection->dbname,
+                                          'charset' => $config->get('database')->connection->charset,
+                                        ),
+                                      )
+                        );
 
 		$em = Doctrine\ORM\EntityManager::create($connectionParams, $doctrineConfig);
 		Yaf\Registry::set("entityManager", $em);
