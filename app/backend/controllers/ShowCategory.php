@@ -10,16 +10,19 @@ class ShowCategoryController extends Yaf\Controller_Abstract
 
   public function editAction() 
   {
+  	$em = Yaf\Registry::get("entityManager");
+
+  	$id = $this->getRequest()->get("id","");
+  	if($id)
+  	{
+  		$showcategory = $em->find('Entity\ShowCategory', $id);
+  	}else{
+  		$this->getView()->assign("die_error", "该分类不存在");
+  	}
+
     if($this->getRequest()->isPost())
     {
-      $name = $this->getRequest()->getPost("name","");
-      $id = $this->getRequest()->getPost("id","");
-      $em = Yaf\Registry::get("entityManager");
-
-      if($id)
-      {
-      	$showcategory = $em->find('Entity\ShowCategory', $id);
-      }
+      $name = trim($this->getRequest()->getPost("name",""));
 
       if($name)
       {
@@ -31,8 +34,15 @@ class ShowCategoryController extends Yaf\Controller_Abstract
       	$showcategory->setTotalShows(0);
       	$em->persist($showcategory);
       	$em->flush();
+      }else{
+      	$this->getView()->assign("form_error_name", "名称不能为空");
       }
         
+    }
+
+    if($showcategory)
+    {
+    	$this->getView()->assign("name", $showcategory->getName());
     }
 
   }

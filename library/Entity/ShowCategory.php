@@ -15,7 +15,6 @@ class ShowCategory
     private $name;
     /** @Column(type="smallint", name="total_shows") */
     private $totalShows;//多少节目
-    
 
     /**
      * Get id
