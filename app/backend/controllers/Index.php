@@ -33,7 +33,7 @@ class IndexController extends Yaf\Controller_Abstract
     }
 
     $this->getView()->assign("content", "I am backend login");
-    Yaf\Registry::get("layout")->setTemplate("layoutGuest.pthml");
+    Yaf\Registry::get("layout")->setTemplate("layoutGuest.phtml");
     
   }
 }

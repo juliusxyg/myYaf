@@ -8,7 +8,7 @@ class LayoutPlugin extends Yaf\Plugin_Abstract
 
   public function __construct($layoutFile=null, $layoutDir=null)
   {
-    $this->_layoutFile = $layoutFile ? $layoutFile : Yaf\Registry::get("config")->get('template')->default;
+    $this->_layoutFile = $layoutFile ? $layoutFile : Yaf\Registry::get("config")->get('template')->layout;
     $this->_layoutDir = $layoutDir ? $layoutDir : Yaf\Registry::get("config")->get('application')->layout;
   }
 
