@@ -1,1 +1,25 @@
-list
+<ol class="breadcrumb">
+  <li><a href="/admin.php/home">首页</a></li>
+  <li class="active">栏目分类列表</li>
+</ol>
+
+<table class="table table-striped">
+<?php if(!empty($results)): ?>
+	<tr>
+  	<th>id</th>
+	  <th>name</th>
+	  <th>total shows</th>
+	  <th>#</th>
+	</tr>
+	<?php foreach($results as $category): ?>
+  <tr>
+	  <td><?php echo $category['id'];?></td>
+	  <td><?php echo $category['name'];?></td>
+	  <td><?php echo $category['totalShows'];?></td>
+	  <td><a href="edit/id/<?php echo $category['id'];?>" target="_blank">编辑</td>
+	</tr>
+	<?php endforeach;?>
+<?php endif;?>
+</table>
+
+<a href="edit" target="_blank" class="btn btn-primary">创建</a>

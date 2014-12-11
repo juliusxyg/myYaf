@@ -4,7 +4,15 @@ class ShowCategoryController extends Yaf\Controller_Abstract
 {
   public function listAction() 
   {
-   		
+   	$em = Yaf\Registry::get("entityManager");
+    $query = $em->createQuery('SELECT a.id, a.name, a.totalShows FROM Entity\ShowCategory a');
+    try{
+	    $results = $query->getResult();
+	  }catch(Exception $e){
+	  	echo $e->getMessage();
+	  }
+
+    $this->getView()->assign("results", $results);
     
   }
 
