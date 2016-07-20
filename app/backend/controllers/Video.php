@@ -14,7 +14,7 @@ class VideoController extends Yaf\Controller_Abstract
     $query = $em->createQuery('SELECT a.id, a.title, a.game, a.source, a.vurl, b.weight FROM Entity\LiveVideo a LEFT JOIN Entity\LiveVideoSort b WITH a.hash = b.hash ORDER BY b.weight DESC');
     $results = $query->getResult();
 
-    Yaf\Registry::get("layout")->setTemplate("layoutGuest.pthml");
+    Yaf\Registry::get("layout")->setTemplate("layoutGuest.phtml");
     $this->getView()->assign("results", $results);
     
   }
